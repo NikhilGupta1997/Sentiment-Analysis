@@ -1,18 +1,18 @@
 import numpy as np
+import pickle
+import random
+import re
+import string
+import sys
+import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-import string, re
-import pickle
-import time
-import sys
-import random
 
-# from torch.nn.utils.rnn import pad_sequence
-from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from parse_data import *
 from torch.autograd import Variable
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 # Global Variables
 EMBEDDING_DIM = 128
