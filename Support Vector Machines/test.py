@@ -1,25 +1,19 @@
-import numpy as np
-import json
-from pprint import pprint
-import string, re
-from nltk.corpus import stopwords
+import argparse
 import nltk
+import numpy as np
 import pickle
-from nltk.stem import WordNetLemmatizer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn import svm
-from sklearn.ensemble import RandomForestClassifier
+import re
 import random
+import string
+
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from sklearn import svm
 from sklearn.svm import LinearSVC
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
-import sys
-import os
-import argparse
-import subprocess
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
 
 infile = sys.argv[1]
 outfile = sys.argv[2]
@@ -37,9 +31,6 @@ def read_input(file):
 		text = ','.join(data[1].split(',')[:-1]).strip().strip('\"')
 		rating = float(data[2].split(',')[0].strip())
 		summary = data[3].strip().strip('}').strip('\"')
-		# all_text.append(parse_text(text)[0])
-		# all_ratings.append(parse_rating(rating)[0])
-		# all_summaries.append(parse_summary(summary)[0])
 		all_text.append(parse_text(text))
 		all_ratings.append(parse_rating(rating))
 		all_summaries.append(parse_summary(summary))
@@ -70,25 +61,16 @@ def negation(sentence):
 		if 'n\'t' in word or word == 'never' or word =='not' or word =='NOT' or word =='Not':
 			if len(sentence) > i+1:
 				sentence[i+1] = 'not_' + sentence[i+1]
-			# if len(sentence) > i+2:
-			# 	sentence[i+2] = 'not_' + sentence[i+2]
 	return sentence
 
 def parse_text(text):
 	tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 	pos = ['CC', 'DT', 'JJ', 'JJR', 'JJS', 'MD', 'PDT', 'RB', 'RBR', 'RBS', 'VBN', 'VBZ','WRB']
-	# for i, story in enumerate(text):
 	sentences = tokenizer.tokenize(text)
 	for j, sentence in enumerate(sentences):
-		# sentence = remove_punctuation(sentence)
 		sentence = remove_quot(sentence)
-		# tagged_sentence = nltk.tag.pos_tag(sentence.split())
-		# edited_sentence = [word.strip() for word,tag in tagged_sentence if tag in pos]
-		# sentence = ' '.join(edited_sentence)
-		# sentence = to_lowercase(sentence)
 		sentence = remove_proper_nouns(sentence)
 		sentence = negation(sentence)
-		# sentence = remove_stopwords(sentence)
 		sentences[j] = ' '.join(sentence)
 	text = "".join(sentences)
 	return text
@@ -102,16 +84,9 @@ def parse_rating(score):
 
 def parse_summary(sentence):
 	pos = ['CC', 'DT', 'JJ', 'JJR', 'JJS', 'MD', 'PDT', 'RB', 'RBR', 'RBS', 'VBN', 'VBZ','WRB']
-	# sentence = remove_punctuation(sentence)
 	sentence = remove_quot(sentence)
-	# sentence = remove_punc(sentence)
-	# tagged_sentence = nltk.tag.pos_tag(sentence.split())
-	# edited_sentence = [word for word,tag in tagged_sentence if tag in pos]
-	# sentence = ' '.join(edited_sentence)
-	# sentence = to_lowercase(sentence)
 	sentence = remove_proper_nouns(sentence)
 	sentence = ' '.join(negation(sentence))
-	# sentence = remove_stopwords(sentence)
 	return sentence
 
 def accuracy(preds, rating):
@@ -161,7 +136,8 @@ preds = clf.predict(val_text)
 
 P, R, F, C = accuracy(preds, dev_rating)
 print(C)
-print(P, R)
+print('Precision', P)
+print('Recall', R)
 print('F-score = ', F)
 
 with open(outfile, 'w') as file:
